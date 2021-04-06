@@ -8,6 +8,7 @@ import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 
 class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
@@ -28,19 +29,24 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
         tv_option_two.setOnClickListener(this)
         tv_option_three.setOnClickListener(this)
         tv_option_four.setOnClickListener(this)
-
+        btn_submit.setOnClickListener(this)
 
     }
 
     private fun setQuestion(){
-        mCurrentPosition = 1
+
         val question = mQuestionsList!![mCurrentPosition - 1]
 
         defaultOptionsView()
 
+        if(mCurrentPosition == mQuestionsList!!.size){
+            btn_submit.text = "FINISH"
+        }else{
+            btn_submit.text = "SUBMIT"
+        }
+
         progress_bar.progress = mCurrentPosition
         tv_progress.text = "$mCurrentPosition" + "/" + progress_bar.max
-
         tv_question.text = question!!.question
         iv_image.setImageResource(question.image)
         tv_option_one.text = question.optionOne
@@ -77,6 +83,57 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
             }
             R.id.tv_option_four ->{
                 selectedOptionView(tv_option_four,4)
+            }
+
+            R.id.btn_submit ->{
+                if(mSelectedOptionPosition == 0){
+                    mCurrentPosition++
+                    when{
+                        mCurrentPosition <= mQuestionsList!!.size ->{
+                            setQuestion()
+                        }
+                        else ->{
+                            Toast.makeText(this,"You have successfully completed the quiz",
+                            Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                else{
+                    val question = mQuestionsList?.get(mCurrentPosition - 1)
+                    if(question!!.currentAnswer != mSelectedOptionPosition){
+                        answerView(mSelectedOptionPosition, R.drawable.wrong_option_border_bg)
+                    }
+                    answerView(mSelectedOptionPosition,R.drawable.correct_option_border_bg)
+
+                    if(mCurrentPosition == mQuestionsList!!.size){
+                        btn_submit.text = "FINISH"
+                    }else{
+                        btn_submit.text = "GO TO NEXT QUESTION"
+                    }
+                    mSelectedOptionPosition = 0
+                }
+
+            }
+        }
+    }
+
+    private fun answerView(answer: Int, drawableView: Int){
+        when(answer){
+            1 ->{
+                tv_option_one.background = ContextCompat.getDrawable(
+                    context:this,drawableView)
+            }
+            2 ->{
+                tv_option_two.background = ContextCompat.getDrawable(
+                    context:this,drawableView)
+            }
+            3 ->{
+                tv_option_three.background = ContextCompat.getDrawable(
+                    context:this,drawableView)
+            }
+            4 ->{
+                tv_option_four.background = ContextCompat.getDrawable(
+                    context:this,drawableView)
             }
         }
     }
